@@ -2,7 +2,7 @@
 #   CLAUDE CODE SUPERSTACK - Windows Installer
 #   Run in PowerShell as Administrator:
 #     Set-ExecutionPolicy Bypass -Scope Process -Force
-#     .\install-claude-superstack.ps1
+#     iwr -useb https://raw.githubusercontent.com/vargaioan54-code/claude-superstack/main/install-claude-superstack.ps1 | iex
 # ═══════════════════════════════════════════════════════════════
 
 $ErrorActionPreference = "Continue"
@@ -16,7 +16,7 @@ Write-Host ""
 Write-Host "[1/6] Checking Node.js..." -ForegroundColor Yellow
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     Write-Host "  Installing Node.js LTS via winget..." -ForegroundColor Gray
-    winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+    winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 } else {
     Write-Host "  Node.js found: $(node --version)" -ForegroundColor Green
@@ -25,43 +25,68 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 # ─── 2. Git + GitHub CLI ──────────────────────────────────────
 Write-Host "[2/6] Checking Git + gh..." -ForegroundColor Yellow
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements
+    winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements --silent
 }
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-    winget install -e --id GitHub.cli --accept-source-agreements --accept-package-agreements
+    winget install -e --id GitHub.cli --accept-source-agreements --accept-package-agreements --silent
+}
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# ─── 3. Claude Code CLI (optional — works alongside VSCode extension) ─
+Write-Host "[3/6] Installing Claude Code CLI..." -ForegroundColor Yellow
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    npm install -g @anthropic-ai/claude-code 2>&1 | Out-Null
+    if (Get-Command claude -ErrorAction SilentlyContinue) {
+        Write-Host "  Claude Code CLI installed: $(claude --version)" -ForegroundColor Green
+    } else {
+        Write-Host "  Claude Code CLI install completed (restart shell to use)" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "  npm not found - skipping (Node.js install pending PATH refresh)" -ForegroundColor Yellow
 }
 
-# ─── 3. Claude Code CLI ───────────────────────────────────────
-Write-Host "[3/6] Installing Claude Code..." -ForegroundColor Yellow
-npm install -g @anthropic-ai/claude-code
+# ─── 4. Register MCP Servers ──────────────────────────────────
+Write-Host "[4/6] Registering MCP servers..." -ForegroundColor Yellow
 
-# ─── 4. MCP Servers (REAL, official) ──────────────────────────
-Write-Host "[4/6] Adding MCP servers..." -ForegroundColor Yellow
-
-# Sequential thinking - chain-of-thought reasoning
-claude mcp add sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
-
-# Context7 - up-to-date library docs (Upstash)
-claude mcp add context7 -- npx -y @upstash/context7-mcp
-
-# Playwright - browser automation
-claude mcp add playwright -- npx -y @playwright/mcp@latest
-
-# Fetch - HTTP requests + URL content
-claude mcp add fetch -- npx -y @modelcontextprotocol/server-fetch
-
-# Memory - persistent knowledge graph
-claude mcp add memory -- npx -y @modelcontextprotocol/server-memory
-
-# Filesystem - sandboxed file access (Desktop scope)
 $desktop = [Environment]::GetFolderPath("Desktop")
-claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem $desktop
+$useCLI = $false
+if (Get-Command claude -ErrorAction SilentlyContinue) { $useCLI = $true }
 
-# GitHub - repos, issues, PRs (needs GITHUB_TOKEN env var to auth)
-claude mcp add github -- npx -y @modelcontextprotocol/server-github
+if ($useCLI) {
+    Write-Host "  Using 'claude mcp add' (CLI mode)..." -ForegroundColor Gray
+    claude mcp add sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
+    claude mcp add context7 -- npx -y @upstash/context7-mcp
+    claude mcp add playwright -- npx -y @playwright/mcp@latest
+    claude mcp add fetch -- npx -y @modelcontextprotocol/server-fetch
+    claude mcp add memory -- npx -y @modelcontextprotocol/server-memory
+    claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem $desktop
+    claude mcp add github -- npx -y @modelcontextprotocol/server-github
+    claude mcp add claude-flow -- npx -y claude-flow@alpha mcp start
+} else {
+    Write-Host "  No 'claude' CLI found — writing ~/.claude.json directly (VSCode extension mode)..." -ForegroundColor Gray
+    $cfgPath = "$env:USERPROFILE\.claude.json"
+    if (Test-Path $cfgPath) {
+        Copy-Item $cfgPath "$cfgPath.bak" -Force
+        $c = Get-Content $cfgPath -Raw | ConvertFrom-Json
+    } else {
+        if (-not (Test-Path "$env:USERPROFILE\.claude")) { New-Item -ItemType Directory -Path "$env:USERPROFILE\.claude" -Force | Out-Null }
+        $c = [PSCustomObject]@{}
+    }
 
-# Claude Flow - swarm orchestration + 90+ tools (ruvnet)
-claude mcp add claude-flow -- npx -y claude-flow@alpha mcp start
+    $mcps = @{
+        "sequential-thinking" = @{ type = "stdio"; command = "npx"; args = @("-y", "@modelcontextprotocol/server-sequential-thinking") }
+        "context7"            = @{ type = "stdio"; command = "npx"; args = @("-y", "@upstash/context7-mcp") }
+        "playwright"          = @{ type = "stdio"; command = "npx"; args = @("-y", "@playwright/mcp@latest") }
+        "fetch"               = @{ type = "stdio"; command = "npx"; args = @("-y", "@modelcontextprotocol/server-fetch") }
+        "memory"              = @{ type = "stdio"; command = "npx"; args = @("-y", "@modelcontextprotocol/server-memory") }
+        "filesystem"          = @{ type = "stdio"; command = "npx"; args = @("-y", "@modelcontextprotocol/server-filesystem", $desktop) }
+        "github"              = @{ type = "stdio"; command = "npx"; args = @("-y", "@modelcontextprotocol/server-github") }
+        "claude-flow"         = @{ type = "stdio"; command = "npx"; args = @("-y", "claude-flow@alpha", "mcp", "start") }
+    }
+    $c | Add-Member -NotePropertyName mcpServers -NotePropertyValue $mcps -Force
+    $c | ConvertTo-Json -Depth 20 | Set-Content $cfgPath -Encoding UTF8
+    Write-Host "  Wrote 8 MCP servers to $cfgPath" -ForegroundColor Green
+}
 
 # ─── 5. Global CLAUDE.md config ───────────────────────────────
 Write-Host "[5/6] Writing global CLAUDE.md..." -ForegroundColor Yellow
@@ -91,28 +116,26 @@ Concise. Action-first. No fluff. Read before edit. Edit before write.
 - For unfamiliar libraries: query context7 first.
 
 ## Quick Commands
-- claude mcp list                    — show registered MCP servers
-- claude mcp remove <name>           — remove an MCP server
+- claude mcp list                    — show registered MCP servers (CLI)
 - npx claude-flow@alpha --help       — swarm tools
+- gh auth status                     — verify GitHub auth
 '@ | Out-File -FilePath "$claudeDir\CLAUDE.md" -Encoding utf8
 
-# ─── 6. Verify ────────────────────────────────────────────────
-Write-Host "[6/6] Verifying..." -ForegroundColor Yellow
-Write-Host ""
-Write-Host "════ Registered MCP servers ════" -ForegroundColor Cyan
-claude mcp list
-
+# ─── 6. Summary ───────────────────────────────────────────────
+Write-Host "[6/6] Done!" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "════════════════════════════════════════════" -ForegroundColor Green
-Write-Host "  DONE!" -ForegroundColor Green
+Write-Host "  INSTALL COMPLETE" -ForegroundColor Green
 Write-Host "════════════════════════════════════════════" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "  1. Restart PowerShell" -ForegroundColor White
-Write-Host "  2. Run: claude" -ForegroundColor White
-Write-Host "  3. Login with your Anthropic account" -ForegroundColor White
+Write-Host "  1. Restart PowerShell (and VSCode if you use the extension)" -ForegroundColor White
+Write-Host "  2. CLI users: run 'claude' then 'claude mcp list'" -ForegroundColor White
+Write-Host "  3. VSCode users: reload window — MCP servers load automatically" -ForegroundColor White
 Write-Host ""
-Write-Host "Optional (for GitHub MCP):" -ForegroundColor Yellow
+Write-Host "Optional (for GitHub MCP auth):" -ForegroundColor Yellow
 Write-Host "  gh auth login" -ForegroundColor White
 Write-Host "  [Environment]::SetEnvironmentVariable('GITHUB_TOKEN', (gh auth token), 'User')" -ForegroundColor White
+Write-Host ""
+Write-Host "Repo: https://github.com/vargaioan54-code/claude-superstack" -ForegroundColor Cyan
 Write-Host ""
