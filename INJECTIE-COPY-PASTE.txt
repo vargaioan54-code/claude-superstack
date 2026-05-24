@@ -1,0 +1,81 @@
+═══════════════════════════════════════════════════════════════
+  CLAUDE CODE SUPERSTACK - INJECȚIE COPY-PASTE (Windows)
+═══════════════════════════════════════════════════════════════
+
+PENTRU PRIETEN: deschide PowerShell ca Administrator (click dreapta pe
+Start → "Terminal (Admin)") și dă paste la blocul de jos. Apasă Enter.
+
+───────────────────────────────────────────────────────────────
+  COPIAZĂ DE AICI ↓
+───────────────────────────────────────────────────────────────
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb "https://raw.githubusercontent.com/USER/REPO/main/install-claude-superstack.ps1" | iex
+
+───────────────────────────────────────────────────────────────
+  ↑ PÂNĂ AICI
+───────────────────────────────────────────────────────────────
+
+⚠ ATENȚIE: Linia de mai sus nu funcționează încă — trebuie să urci
+   întâi install-claude-superstack.ps1 pe GitHub (sau pe orice URL public),
+   apoi înlocuiești "USER/REPO" cu URL-ul tău real.
+
+═══════════════════════════════════════════════════════════════
+  VARIANTA ALTERNATIVĂ (fără GitHub) — îi trimiți fișierul direct
+═══════════════════════════════════════════════════════════════
+
+1. Trimite-i fișierul:  install-claude-superstack.ps1
+2. El îl salvează pe Desktop
+3. Deschide PowerShell ca Admin și rulează:
+
+   cd $env:USERPROFILE\Desktop
+   Set-ExecutionPolicy Bypass -Scope Process -Force
+   .\install-claude-superstack.ps1
+
+
+═══════════════════════════════════════════════════════════════
+  CE INSTALEAZĂ (toate REALE, verificate)
+═══════════════════════════════════════════════════════════════
+
+  Layer    │ Tool                  │ Rol
+  ─────────┼───────────────────────┼──────────────────────────────────────
+  Base     │ Node.js LTS           │ runtime pentru Claude
+  Base     │ Git + GitHub CLI      │ control versiune
+  CLI      │ Claude Code           │ CLI oficial Anthropic
+  MCP      │ sequential-thinking   │ chain-of-thought reasoning
+  MCP      │ context7              │ docs proaspete pentru orice librărie
+  MCP      │ playwright            │ automatizare browser, screenshots
+  MCP      │ fetch                 │ HTTP requests, conținut URL
+  MCP      │ memory                │ knowledge graph persistent
+  MCP      │ filesystem            │ acces fișiere sandbox (Desktop)
+  MCP      │ github                │ repos, issues, PRs
+  MCP      │ claude-flow           │ swarm orchestration, 90+ tools
+  Config   │ ~/.claude/CLAUDE.md   │ instrucțiuni globale
+
+
+═══════════════════════════════════════════════════════════════
+  DUPĂ INSTALARE
+═══════════════════════════════════════════════════════════════
+
+  1. Restart PowerShell
+  2. Rulează:  claude
+  3. Login cu contul Anthropic (browser se deschide automat)
+  4. Test:  claude mcp list   (trebuie să vezi toate cele 8 servere)
+
+
+═══════════════════════════════════════════════════════════════
+  TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+❌ "winget not found"
+   → Update Windows / instalează "App Installer" din Microsoft Store
+
+❌ "npm not found" după instalare Node
+   → Restart PowerShell (PATH-ul se reîncarcă)
+
+❌ "claude command not found"
+   → Verifică: npm root -g
+   → Adaugă path-ul la PATH dacă lipsește
+
+❌ Un MCP server pică
+   → claude mcp remove <name>
+   → claude mcp add ... (re-rulează linia respectivă)
