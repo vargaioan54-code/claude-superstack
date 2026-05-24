@@ -2,34 +2,19 @@
   CLAUDE CODE SUPERSTACK - INJECȚIE COPY-PASTE (Windows)
 ═══════════════════════════════════════════════════════════════
 
-PENTRU PRIETEN: deschide PowerShell ca Administrator (click dreapta pe
-Start → "Terminal (Admin)") și dă paste la blocul de jos. Apasă Enter.
+PENTRU PRIETEN: deschide PowerShell ca Administrator (click dreapta
+pe Start → "Terminal (Admin)") și dă paste la linia de mai jos.
+Apoi Enter. Restul se face singur.
 
 ───────────────────────────────────────────────────────────────
   COPIAZĂ DE AICI ↓
 ───────────────────────────────────────────────────────────────
 
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb "https://raw.githubusercontent.com/USER/REPO/main/install-claude-superstack.ps1" | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/vargaioan54-code/claude-superstack/main/install-claude-superstack.ps1 | iex
 
 ───────────────────────────────────────────────────────────────
   ↑ PÂNĂ AICI
 ───────────────────────────────────────────────────────────────
-
-⚠ ATENȚIE: Linia de mai sus nu funcționează încă — trebuie să urci
-   întâi install-claude-superstack.ps1 pe GitHub (sau pe orice URL public),
-   apoi înlocuiești "USER/REPO" cu URL-ul tău real.
-
-═══════════════════════════════════════════════════════════════
-  VARIANTA ALTERNATIVĂ (fără GitHub) — îi trimiți fișierul direct
-═══════════════════════════════════════════════════════════════
-
-1. Trimite-i fișierul:  install-claude-superstack.ps1
-2. El îl salvează pe Desktop
-3. Deschide PowerShell ca Admin și rulează:
-
-   cd $env:USERPROFILE\Desktop
-   Set-ExecutionPolicy Bypass -Scope Process -Force
-   .\install-claude-superstack.ps1
 
 
 ═══════════════════════════════════════════════════════════════
@@ -63,6 +48,13 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb "https://raw.githubu
 
 
 ═══════════════════════════════════════════════════════════════
+  REPO PUBLIC
+═══════════════════════════════════════════════════════════════
+
+  https://github.com/vargaioan54-code/claude-superstack
+
+
+═══════════════════════════════════════════════════════════════
   TROUBLESHOOTING
 ═══════════════════════════════════════════════════════════════
 
@@ -79,3 +71,15 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb "https://raw.githubu
 ❌ Un MCP server pică
    → claude mcp remove <name>
    → claude mcp add ... (re-rulează linia respectivă)
+
+
+═══════════════════════════════════════════════════════════════
+  VARIANTA ALTERNATIVĂ (fără internet la prieten)
+═══════════════════════════════════════════════════════════════
+
+1. Trimite-i fișierul:  install-claude-superstack.ps1
+2. El îl salvează pe Desktop
+3. PowerShell ca Admin:
+   cd $env:USERPROFILE\Desktop
+   Set-ExecutionPolicy Bypass -Scope Process -Force
+   .\install-claude-superstack.ps1

@@ -24,10 +24,8 @@ One-click installer for a powerful Claude Code setup on Windows.
 Open **PowerShell as Administrator** and run:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/REPO_URL/main/install-claude-superstack.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/vargaioan54-code/claude-superstack/main/install-claude-superstack.ps1 | iex
 ```
-
-The real URL will be in `INJECTIE-COPY-PASTE.txt` after this repo is published.
 
 ## Manual install
 
